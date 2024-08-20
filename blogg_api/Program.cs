@@ -7,6 +7,7 @@ using blogg_api.Models;
 using blogg_api.Models.DTOs;
 using blogg_api.Services;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace blogg_api
 {
@@ -30,6 +31,10 @@ namespace blogg_api
             builder.Services.AddValidatorsFromAssemblyContaining<BlogTagCreateDTO>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogTagUpdateDTO>();
 
+            builder.Services.AddScoped<IAppRepository<BlogContent>, BlogContentRepository>();
+            builder.Services.AddValidatorsFromAssemblyContaining<BlogContentCreateDTO>();
+            builder.Services.AddValidatorsFromAssemblyContaining<BlogContentUpdateDTO>();
+
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
             var app = builder.Build();
@@ -45,6 +50,7 @@ namespace blogg_api
 
             app.UseAuthorization();
 
+            // BlogTag Endpoints
             app.MapGet("/api/BlogTag", async (IAppRepository<BlogTag> repository) =>
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
@@ -157,6 +163,121 @@ namespace blogg_api
 
                 return Results.Ok(response);
             }).Accepts<BlogTagUpdateDTO>("application/json").Produces<ApiResponse>(200).Produces(400);
+
+
+            // BlogContent Endpoints
+
+            app.MapGet("/api/BlogContent", async (IAppRepository<BlogContent> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+                response.Result = await repository.GetAllAsync();
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200);
+
+            app.MapGet("/api/BlogContent/id", async (int id, IAppRepository<BlogContent> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+                response.Result = await repository.GetSingleAsync(id);
+                if (response.Result == null)
+                {
+                    return Results.BadRequest(response);
+                }
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200).Produces(400);
+
+            app.MapPost("/api/BlogContent",
+            async (
+            [FromServices] IValidator<BlogContentCreateDTO> validator,
+            [FromServices] IMapper _mapper,
+            [FromBody] BlogContentCreateDTO C_BlogContent_DTO,
+            IAppRepository<BlogContent> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+
+                var validateInput = await validator.ValidateAsync(C_BlogContent_DTO);
+                if (!validateInput.IsValid)
+                {
+                    foreach (var error in validateInput.Errors.ToList())
+                    {
+                        response.ErrorMessages.Add(error.ToString());
+                    }
+                    return Results.BadRequest(response);
+                }
+
+                BlogContent content = _mapper.Map<BlogContent>(C_BlogContent_DTO);
+
+                response.Result = await repository.AddAsync(content);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add("ERROR: Something went wrong");
+                    return Results.BadRequest(response);
+                }
+
+                response.Result = _mapper.Map<BlogContentCreateDTO>(content); 
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            });
+
+            app.MapDelete("/api/BlogContent/{id:int}", async (int id, IAppRepository<BlogContent> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+
+                response.Result = await repository.DeleteAsync(id);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add($"No content with id {id} exists");
+                    return Results.BadRequest(response);
+                }
+
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            });
+
+            app.MapPut("/api/BlogContent",
+            async (
+            [FromServices] IValidator<BlogContentUpdateDTO> validator,
+            [FromServices] IMapper _mapper,
+            [FromBody] BlogContentUpdateDTO U_BlogContent_DTO,
+            IAppRepository<BlogContent> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+
+                var validateInput = await validator.ValidateAsync(U_BlogContent_DTO);
+                if (!validateInput.IsValid)
+                {
+                    foreach (var error in validateInput.Errors.ToList())
+                    {
+                        response.ErrorMessages.Add(error.ToString());
+                    }
+                    return Results.BadRequest(response);
+                }
+
+                BlogContent content = _mapper.Map<BlogContent>(U_BlogContent_DTO);
+
+                response.Result = await repository.UpdateAsync(content);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add($"ERROR: No content with id");
+                    return Results.BadRequest(response);
+                }
+
+                response.Result = _mapper.Map<BlogContentUpdateDTO>(content);
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            });
+
+
+
 
             app.Run();
         }
