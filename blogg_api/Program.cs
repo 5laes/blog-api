@@ -35,6 +35,10 @@ namespace blogg_api
             builder.Services.AddValidatorsFromAssemblyContaining<BlogContentCreateDTO>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogContentUpdateDTO>();
 
+            builder.Services.AddScoped<IAppRepository<BlogPost>, BlogPostRepository>();
+            builder.Services.AddValidatorsFromAssemblyContaining<BlogPostCreateDTO>();
+            builder.Services.AddValidatorsFromAssemblyContaining<BlogPostUpdateDTO>();
+
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
             var app = builder.Build();

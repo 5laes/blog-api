@@ -10,8 +10,11 @@ namespace blogg_api.Models
         [Key]
         [Column(Order = 1)]
         public int ContentId { get; set; }
+        public BlogContent Content { get; set; }
+
         [Key]
         [Column(Order = 2)]
-        public int TagId { get; set; } 
+        public int TagId { get; set; }
+        public BlogTag Tag { get; set; }
     }
 }

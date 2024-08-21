@@ -12,6 +12,8 @@ namespace blogg_api
             CreateMap<BlogTag, BlogTagUpdateDTO>().ReverseMap();
             CreateMap<BlogContent, BlogContentCreateDTO>().ReverseMap();
             CreateMap<BlogContent, BlogContentUpdateDTO>().ReverseMap();
+            CreateMap<BlogPost, BlogPostCreateDTO>().ReverseMap();
+            CreateMap<BlogPost, BlogPostUpdateDTO>().ReverseMap();
         }
     }
 }

@@ -31,14 +31,12 @@ namespace blogg_api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DatePublished")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -50,7 +48,7 @@ namespace blogg_api.Migrations
                         {
                             Id = 1,
                             Content = "This is a test blog",
-                            DatePublished = new DateTime(2024, 8, 18, 16, 45, 42, 545, DateTimeKind.Local).AddTicks(7517),
+                            DatePublished = new DateTime(2024, 8, 21, 16, 4, 58, 7, DateTimeKind.Local).AddTicks(1772),
                             Title = "Test"
                         });
                 });
@@ -66,6 +64,8 @@ namespace blogg_api.Migrations
                         .HasColumnOrder(2);
 
                     b.HasKey("ContentId", "TagId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("Posts");
 
@@ -85,11 +85,15 @@ namespace blogg_api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BlogTagId")
+                        .HasColumnType("int");
+
                     b.Property<string>("TagName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BlogTagId");
 
                     b.ToTable("Tags");
 
@@ -99,6 +103,42 @@ namespace blogg_api.Migrations
                             Id = 1,
                             TagName = "Test"
                         });
+                });
+
+            modelBuilder.Entity("blogg_api.Models.BlogPost", b =>
+                {
+                    b.HasOne("blogg_api.Models.BlogContent", "Content")
+                        .WithMany("Posts")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("blogg_api.Models.BlogTag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Content");
+
+                    b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("blogg_api.Models.BlogTag", b =>
+                {
+                    b.HasOne("blogg_api.Models.BlogTag", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("BlogTagId");
+                });
+
+            modelBuilder.Entity("blogg_api.Models.BlogContent", b =>
+                {
+                    b.Navigation("Posts");
+                });
+
+            modelBuilder.Entity("blogg_api.Models.BlogTag", b =>
+                {
+                    b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618
         }
