@@ -9,6 +9,7 @@ namespace blogg_api.Models.Validators
         {
             RuleFor(model => model.Title).NotEmpty();
             RuleFor(model => model.Content).NotEmpty();
+            RuleFor(model => model.TagId).NotEmpty();
         }
     }
 }

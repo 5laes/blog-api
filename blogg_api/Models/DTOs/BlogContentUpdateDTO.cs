@@ -10,5 +10,7 @@ namespace blogg_api.Models.DTOs
         public string Title { get; set; }
         [Required]
         public string Content { get; set; }
+        [Required]
+        public int TagId { get; set; }
     }
 }

@@ -12,7 +12,6 @@ namespace blogg_api.Data
 
         public DbSet<BlogContent> Contents { get; set; }
         public DbSet<BlogTag> Tags { get; set; }
-        public DbSet<BlogPost> Posts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -21,30 +20,6 @@ namespace blogg_api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<BlogContent>().HasData(
-                new BlogContent()
-                {
-                    Id = 1,
-                    Title = "Test",
-                    Content = "This is a test blog",
-                    DatePublished = DateTime.Now
-                });
-
-            modelBuilder.Entity<BlogTag>().HasData(
-                new BlogTag()
-                {
-                    Id = 1,
-                    TagName = "Test",
-                });
-
-            modelBuilder.Entity<BlogPost>().HasData(
-                new BlogPost()
-                {
-                    ContentId = 1,
-                    TagId = 1,
-                });
 
         }
     }

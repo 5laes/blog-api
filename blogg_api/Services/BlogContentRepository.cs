@@ -32,7 +32,7 @@ namespace blogg_api.Services
 
         public async Task<IEnumerable<BlogContent>> GetAllAsync()
         {
-            return await _context.Contents.ToListAsync();
+            return await _context.Contents.Include(t => t.Tag).ToListAsync();
         }
 
         public async Task<BlogContent> GetSingleAsync(int Id)
