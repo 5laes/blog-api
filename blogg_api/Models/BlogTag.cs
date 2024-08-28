@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace blogg_api.Models
 {
@@ -7,6 +8,7 @@ namespace blogg_api.Models
         public int Id { get; set; }
         public string TagName { get; set; }
 
-        public ICollection<BlogTag> Tags { get; set;} = new List<BlogTag>();
+        [JsonIgnore]
+        public ICollection<BlogPost> Posts { get; set;}
     }
 }

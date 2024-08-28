@@ -283,7 +283,53 @@ namespace blogg_api
 
 
 
-            app.Run();
+            app.MapGet("/api/BlogPost", async (IAppRepository<BlogPost> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+                response.Result = await repository.GetAllAsync();
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200);
+
+            app.MapPost("/api/BlogPost",
+            async (
+            [FromServices] IValidator<BlogPostCreateDTO> validator,
+            [FromServices] IMapper _mapper,
+            [FromBody] BlogPostCreateDTO C_BlogPost_DTO,
+            IAppRepository<BlogPost> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+
+                var validateInput = await validator.ValidateAsync(C_BlogPost_DTO);
+                if (!validateInput.IsValid)
+                {
+                    foreach (var error in validateInput.Errors.ToList())
+                    {
+                        response.ErrorMessages.Add(error.ToString());
+                    }
+                    return Results.BadRequest(response);
+                }
+
+                BlogPost content = _mapper.Map<BlogPost>(C_BlogPost_DTO);
+
+                response.Result = await repository.AddAsync(content);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add("ERROR: Something went wrong");
+                    return Results.BadRequest(response);
+                }
+
+                response.Result = _mapper.Map<BlogPostCreateDTO>(content);
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            });
+
+
+
+                app.Run();
         }
     }
 }

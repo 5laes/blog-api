@@ -1,5 +1,6 @@
 ﻿using blogg_api.Data;
 using blogg_api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace blogg_api.Services
 {
@@ -12,9 +13,11 @@ namespace blogg_api.Services
             _context = context;
         }
 
-        public Task<BlogPost> AddAsync(BlogPost newEntity)
+        public async Task<BlogPost> AddAsync(BlogPost newEntity)
         {
-            throw new NotImplementedException();
+            var result = await _context.Posts.AddAsync(newEntity);
+            await _context.SaveChangesAsync();
+            return result.Entity;
         }
 
         public Task<BlogPost> DeleteAsync(int Id)
@@ -22,9 +25,9 @@ namespace blogg_api.Services
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<BlogPost>> GetAllAsync()
+        public async Task<IEnumerable<BlogPost>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Posts.Include(x => x.Content).Include(t => t.Tag).ToListAsync();
         }
 
         public Task<BlogPost> GetSingleAsync(int Id)

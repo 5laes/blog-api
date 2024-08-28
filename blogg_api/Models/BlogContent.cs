@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace blogg_api.Models
 {
@@ -9,7 +10,8 @@ namespace blogg_api.Models
         public string Content { get; set; }
         public DateTime DatePublished { get; set; }
 
-        public ICollection<BlogPost> Posts { get; set; } = new List<BlogPost>();
+        [JsonIgnore]
+        public ICollection<BlogPost> Posts { get; set; }
 
         // TODO: add image to post
     }
