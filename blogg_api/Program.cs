@@ -36,6 +36,7 @@ namespace blogg_api
             builder.Services.AddValidatorsFromAssemblyContaining<BlogContentUpdateDTO>();
 
             builder.Services.AddScoped<IAppRepository<BlogPost>, BlogPostRepository>();
+            builder.Services.AddScoped<IPostRepository<BlogPost>, BlogPostRepository>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogPostCreateDTO>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogPostUpdateDTO>();
 
@@ -283,14 +284,56 @@ namespace blogg_api
 
 
 
+            // BlogPost Endpoints
             app.MapGet("/api/BlogPost", async (IAppRepository<BlogPost> repository) =>
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetAllAsync();
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add("Failed to get data from database");
+                    return Results.BadRequest(response);
+                }
+
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            }).Produces<ApiResponse>(200);
+            }).Produces<ApiResponse>(200).Produces(400);
+
+            app.MapGet("api/BlogPost/{id:int}", async (IPostRepository<BlogPost> repository, int Id) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+                response.Result = await repository.GetPostWithTagsAsync(Id);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add($"No post with id {Id} found");
+                    response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                    return Results.NotFound(response);
+                }
+
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200).Produces(404);
+
+            app.MapGet("api/BlogPostTag/{id:int}", async (IPostRepository<BlogPost> repository, int Id) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+                response.Result = await repository.GetPostsByTagAsync(Id);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add($"No post with tag id {Id} found");
+                    response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                    return Results.NotFound(response);
+                }
+
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200).Produces(404);
 
             app.MapPost("/api/BlogPost",
             async (
@@ -327,9 +370,43 @@ namespace blogg_api
                 return Results.Ok(response);
             });
 
+            app.MapDelete("/api/BlogPost", async (IAppRepository<BlogPost> repository, int Id) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+
+                response.Result = await repository.DeleteAsync(Id);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add($"No post with id {Id} exists");
+                    return Results.BadRequest(response);
+                }
+
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200).Produces(400);
+
+            app.MapDelete("/api/BlogPostTag", async (IPostRepository<BlogPost> repository, int Id, int tId) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+
+                response.Result = await repository.RemoveTagAsync(Id, tId);
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add($"No post with id {Id} and tag id {tId}");
+                    return Results.BadRequest();
+                }
+
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200).Produces(400);
 
 
-                app.Run();
+
+            app.Run();
         }
     }
 }
