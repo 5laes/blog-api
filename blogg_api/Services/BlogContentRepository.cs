@@ -37,7 +37,7 @@ namespace blogg_api.Services
 
         public async Task<BlogContent> GetSingleAsync(int Id)
         {
-            return await _context.Contents.FirstOrDefaultAsync(c => c.Id == Id); // fix check for id not found
+            return await _context.Contents.FirstOrDefaultAsync(c => c.Id == Id);
         }
 
         public async Task<BlogContent> UpdateAsync(BlogContent newEntity)

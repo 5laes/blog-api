@@ -60,10 +60,17 @@ namespace blogg_api
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetAllAsync();
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add("Failed to get data from database");
+                    return Results.BadRequest(response);
+                }
+
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            }).Produces<ApiResponse>(200);
+            }).Produces<ApiResponse>(200).Produces(400);
 
             app.MapGet("/api/BlogTag/id", async (int id, IAppRepository<BlogTag> repository) =>
             {
@@ -120,18 +127,18 @@ namespace blogg_api
 
             app.MapDelete("/api/BlogTag/{id:int}", async (int id, IAppRepository<BlogTag> repository) =>
             {
-                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.NotFound };
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
 
                 response.Result = await repository.DeleteAsync(id);
                 if (response.Result == null)
                 {
                     response.ErrorMessages.Add($"ERROR: No Tag with id {id} exists");
-                    return Results.NotFound(response);
+                    return Results.BadRequest(response);
                 }
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.NoContent;
                 return Results.Ok(response);
-            }).Produces<ApiResponse>(204).Produces(404);
+            }).Produces<ApiResponse>(204).Produces(400);
 
             app.MapPut("/api/BlogTag",
             async (
@@ -140,7 +147,7 @@ namespace blogg_api
             [FromBody] BlogTagUpdateDTO U_BlogTag_DTO,
             IAppRepository<BlogTag> repository) =>
             {
-                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.NotFound };
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
 
                 var validateInput = await validator.ValidateAsync(U_BlogTag_DTO);
                 if (!validateInput.IsValid)
@@ -176,10 +183,17 @@ namespace blogg_api
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetAllAsync();
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add("Failed to get data from database");
+                    return Results.BadRequest(response);
+                }
+
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            }).Produces<ApiResponse>(200);
+            }).Produces<ApiResponse>(200).Produces(400);
 
             app.MapGet("/api/BlogContent/id", async (int id, IAppRepository<BlogContent> repository) =>
             {
@@ -220,14 +234,15 @@ namespace blogg_api
                 if (response.Result == null)
                 {
                     response.ErrorMessages.Add("ERROR: Something went wrong");
-                    return Results.BadRequest(response);
+                    response.StatusCode = System.Net.HttpStatusCode.Conflict;
+                    return Results.Conflict(response);
                 }
 
                 response.Result = _mapper.Map<BlogContentCreateDTO>(content); 
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            });
+            }).Accepts<BlogContentCreateDTO>("application/json").Produces<ApiResponse>(201).Produces(400).Produces(409);
 
             app.MapDelete("/api/BlogContent/{id:int}", async (int id, IAppRepository<BlogContent> repository) =>
             {
@@ -244,7 +259,7 @@ namespace blogg_api
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            });
+            }).Produces<ApiResponse>(200).Produces(400);
 
             app.MapPut("/api/BlogContent",
             async (
@@ -279,7 +294,7 @@ namespace blogg_api
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            });
+            }).Produces<ApiResponse>(200).Produces(400);
 
 
 
@@ -309,14 +324,13 @@ namespace blogg_api
                 if (response.Result == null)
                 {
                     response.ErrorMessages.Add($"No post with id {Id} found");
-                    response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                    return Results.NotFound(response);
+                    return Results.BadRequest(response);
                 }
 
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            }).Produces<ApiResponse>(200).Produces(404);
+            }).Produces<ApiResponse>(200).Produces(400);
 
             app.MapGet("api/BlogPostTag/{id:int}", async (IPostRepository<BlogPost> repository, int Id) =>
             {
@@ -326,14 +340,13 @@ namespace blogg_api
                 if (response.Result == null)
                 {
                     response.ErrorMessages.Add($"No post with tag id {Id} found");
-                    response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                    return Results.NotFound(response);
+                    return Results.BadRequest(response);
                 }
 
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            }).Produces<ApiResponse>(200).Produces(404);
+            }).Produces<ApiResponse>(200).Produces(400);
 
             app.MapPost("/api/BlogPost",
             async (
@@ -361,14 +374,15 @@ namespace blogg_api
                 if (response.Result == null)
                 {
                     response.ErrorMessages.Add("ERROR: Something went wrong");
-                    return Results.BadRequest(response);
+                    response.StatusCode = System.Net.HttpStatusCode.Conflict;
+                    return Results.Conflict(response);
                 }
 
                 response.Result = _mapper.Map<BlogPostCreateDTO>(content);
                 response.IsSuccess = true;
                 response.StatusCode = System.Net.HttpStatusCode.OK;
                 return Results.Ok(response);
-            });
+            }).Accepts<BlogPostCreateDTO>("application/json").Produces<ApiResponse>(201).Produces(400).Produces(409);
 
             app.MapDelete("/api/BlogPost", async (IAppRepository<BlogPost> repository, int Id) =>
             {
@@ -396,7 +410,7 @@ namespace blogg_api
                 if (response.Result == null)
                 {
                     response.ErrorMessages.Add($"No post with id {Id} and tag id {tId}");
-                    return Results.BadRequest();
+                    return Results.BadRequest(response);
                 }
 
                 response.IsSuccess = true;

@@ -47,10 +47,6 @@ namespace blogg_api.Services
                 .Include(t => t.Tag)
                 .ToListAsync();
 
-            if (result == null)
-            {
-                return null;
-            }
             return result;
         }
 
@@ -63,7 +59,7 @@ namespace blogg_api.Services
                 .Include(x => x.Tag)
                 .ToListAsync();
 
-            if (result == null)
+            if (result.Count == 0)
             {
                 return null;
             }
@@ -78,7 +74,7 @@ namespace blogg_api.Services
                 .Include(x => x.Tag)
                 .ToListAsync();
 
-            if (result == null)
+            if (result.Count == 0)
             {
                 return null;
             }
@@ -90,7 +86,6 @@ namespace blogg_api.Services
             throw new NotImplementedException();
         }
 
-        // Figure out how to remove a tag from a post
         public async Task<BlogPost> RemoveTagAsync(int postId, int tagId)
         {
             var post = await _context.Posts.Where(x => x.ContentId == postId).FirstOrDefaultAsync(x => x.TagId == tagId);
