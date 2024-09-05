@@ -1,10 +1,11 @@
 ﻿using blogg_api.Data;
 using blogg_api.Models;
+using blogg_api.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace blogg_api.Services
 {
-    public class BlogPostRepository : IAppRepository<BlogPost>, IPostRepository<BlogPost>
+    public class BlogPostRepository : IAppRepository<BlogPost>, IPostRepository<BlogPost>, IPostWithTagRepository<BlogPostWithTagsDTO>
     {
         AppDbContext _context;
 
@@ -63,6 +64,32 @@ namespace blogg_api.Services
             {
                 return null;
             }
+            return result;
+        }
+
+        public async Task<IEnumerable<BlogPostWithTagsDTO>> GetPostsWithTagsAsync()
+        {
+            var result = await _context
+                .Posts
+                .Include(x => x.Content)
+                .Include (x => x.Tag)
+                .GroupBy(p => new
+                {
+                    p.ContentId,
+                    p.Content.Title,
+                    p.Content.Content,
+                    p.Content.DatePublished
+                })
+                .Select(group => new BlogPostWithTagsDTO
+                {
+                    ContentId = group.Key.ContentId,
+                    Title = group.Key.Title,
+                    Content = group.Key.Content,
+                    DatePublished = group.Key.DatePublished,
+                    Tags = group.Select(g => g.Tag.TagName).ToList()
+                })
+                .ToListAsync();
+
             return result;
         }
 

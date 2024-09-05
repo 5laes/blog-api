@@ -17,6 +17,18 @@ namespace blogg_api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                {
+                    builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:3000")
+                    .WithOrigins("http://localhost:5173"); // add azure url here
+                });
+            });
+
             // Add services to the container.
             builder.Services.AddAuthorization();
 
@@ -37,6 +49,7 @@ namespace blogg_api
 
             builder.Services.AddScoped<IAppRepository<BlogPost>, BlogPostRepository>();
             builder.Services.AddScoped<IPostRepository<BlogPost>, BlogPostRepository>();
+            builder.Services.AddScoped<IPostWithTagRepository<BlogPostWithTagsDTO>, BlogPostRepository>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogPostCreateDTO>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogPostUpdateDTO>();
 
@@ -52,6 +65,8 @@ namespace blogg_api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 
@@ -304,6 +319,22 @@ namespace blogg_api
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetAllAsync();
+
+                if (response.Result == null)
+                {
+                    response.ErrorMessages.Add("Failed to get data from database");
+                    return Results.BadRequest(response);
+                }
+
+                response.IsSuccess = true;
+                response.StatusCode = System.Net.HttpStatusCode.OK;
+                return Results.Ok(response);
+            }).Produces<ApiResponse>(200).Produces(400);
+
+            app.MapGet("/api/BlogPostsWithTags", async (IPostWithTagRepository<BlogPostWithTagsDTO> repository) =>
+            {
+                ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
+                response.Result = await repository.GetPostsWithTagsAsync();
 
                 if (response.Result == null)
                 {
