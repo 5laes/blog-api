@@ -51,14 +51,33 @@ namespace blogg_api.Services
             return result;
         }
 
-        public async Task<IEnumerable<BlogPost>> GetPostsByTagAsync(int tagId)
+        public async Task<IEnumerable<BlogPostWithTagsDTO>> GetPostsByTagAsync(int tagId)
         {
-            var result = await _context
-                .Posts
-                .Where(x => x.TagId == tagId)
-                .Include(x => x.Content)
-                .Include(x => x.Tag)
-                .ToListAsync();
+
+            var result = await _context.Posts
+            .Where(p => p.TagId == tagId)
+            .Include(p => p.Content)
+            .Include(p => p.Tag)
+            .GroupBy(p => new
+            {
+                p.ContentId,
+                p.Content.Title,
+                p.Content.Content,
+                p.Content.DatePublished
+            })
+            .Select(group => new BlogPostWithTagsDTO
+            {
+                ContentId = group.Key.ContentId,
+                Title = group.Key.Title,
+                Content = group.Key.Content,
+                DatePublished = group.Key.DatePublished,
+                Tags = _context.Posts
+                    .Where(post => post.ContentId == group.Key.ContentId)
+                    .Select(post => post.Tag.TagName)
+                    .Distinct()
+                    .ToList()
+            })
+            .ToListAsync();
 
             if (result.Count == 0)
             {
@@ -89,6 +108,11 @@ namespace blogg_api.Services
                     Tags = group.Select(g => g.Tag.TagName).ToList()
                 })
                 .ToListAsync();
+
+            if (result.Count == 0)
+            {
+                return null;
+            }
 
             return result;
         }

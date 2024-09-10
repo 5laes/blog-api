@@ -243,6 +243,7 @@ namespace blogg_api
                 }
 
                 BlogContent content = _mapper.Map<BlogContent>(C_BlogContent_DTO);
+                content.DatePublished = DateTime.Now;
 
                 response.Result = await repository.AddAsync(content);
 
@@ -363,7 +364,7 @@ namespace blogg_api
                 return Results.Ok(response);
             }).Produces<ApiResponse>(200).Produces(400);
 
-            app.MapGet("api/BlogPostTag/{id:int}", async (IPostRepository<BlogPost> repository, int Id) =>
+            app.MapGet("api/BlogPostTag/{id:int}", async (IPostWithTagRepository<BlogPostWithTagsDTO> repository, int Id) =>
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetPostsByTagAsync(Id);
