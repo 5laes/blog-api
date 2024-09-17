@@ -63,6 +63,8 @@ namespace blogg_api.Services
                 p.ContentId,
                 p.Content.Title,
                 p.Content.Content,
+                p.Content.YouTubeLink,
+                p.Content.GitHubLink,
                 p.Content.DatePublished
             })
             .Select(group => new BlogPostWithTagsDTO
@@ -70,6 +72,8 @@ namespace blogg_api.Services
                 ContentId = group.Key.ContentId,
                 Title = group.Key.Title,
                 Content = group.Key.Content,
+                YouTubeLink = group.Key.YouTubeLink,
+                GitHubLink = group.Key.GitHubLink,
                 DatePublished = group.Key.DatePublished,
                 Tags = _context.Posts
                     .Where(post => post.ContentId == group.Key.ContentId)
@@ -97,6 +101,8 @@ namespace blogg_api.Services
                     p.ContentId,
                     p.Content.Title,
                     p.Content.Content,
+                    p.Content.YouTubeLink,
+                    p.Content.GitHubLink,
                     p.Content.DatePublished
                 })
                 .Select(group => new BlogPostWithTagsDTO
@@ -104,6 +110,8 @@ namespace blogg_api.Services
                     ContentId = group.Key.ContentId,
                     Title = group.Key.Title,
                     Content = group.Key.Content,
+                    YouTubeLink = group.Key.YouTubeLink,
+                    GitHubLink = group.Key.GitHubLink,
                     DatePublished = group.Key.DatePublished,
                     Tags = group.Select(g => g.Tag.TagName).ToList()
                 })

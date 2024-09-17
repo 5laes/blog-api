@@ -8,5 +8,7 @@ namespace blogg_api.Models.DTOs
         public string Title { get; set; }
         [Required]
         public string Content { get; set; }
+        public string YouTubeLink { get; set; }
+        public string GitHubLink { get; set; }
     }
 }

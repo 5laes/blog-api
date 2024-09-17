@@ -5,6 +5,8 @@
         public int ContentId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
+        public string YouTubeLink { get; set; }
+        public string GitHubLink { get; set; }
         public DateTime DatePublished { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
     }
