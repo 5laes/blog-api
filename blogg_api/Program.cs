@@ -22,10 +22,9 @@ namespace blogg_api
                 options.AddPolicy("CorsPolicy", builder =>
                 {
                     builder
+                    .WithOrigins("http://localhost:4173", "https://victorious-sand-04cc4be0f.5.azurestaticapps.net")
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .WithOrigins("http://localhost:3000")
-                    .WithOrigins("http://localhost:5173"); // add azure url here
+                    .AllowAnyHeader();
                 });
             });
 

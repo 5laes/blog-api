@@ -47,6 +47,8 @@ namespace blogg_api.Services
             {
                 result.Title = newEntity.Title;
                 result.Content = newEntity.Content;
+                result.GitHubLink = newEntity.GitHubLink;
+                result.YouTubeLink = newEntity.YouTubeLink;
 
                 await _context.SaveChangesAsync();
                 return result;

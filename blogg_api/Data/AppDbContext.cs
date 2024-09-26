@@ -14,10 +14,10 @@ namespace blogg_api.Data
         public DbSet<BlogTag> Tags { get; set; }
         public DbSet<BlogPost> Posts { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Server = CLAES; Database = blog_api_db; Encrypt = False; Trusted_Connection = True;");
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer(@"Server = CLAES; Database = blog_api_db; Encrypt = False; Trusted_Connection = True;");
+        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

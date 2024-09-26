@@ -3,4 +3,6 @@
 /blogg_api/Data*
 /blogg_api/Migrations*
 /blogg_api/obj*
+/blogg_api/Properties*
+/blogg_api/.config
 /.vs*
