@@ -22,7 +22,7 @@ namespace blogg_api
                 options.AddPolicy("CorsPolicy", builder =>
                 {
                     builder
-                    .WithOrigins("http://localhost:4173", "https://victorious-sand-04cc4be0f.5.azurestaticapps.net")
+                    .WithOrigins("http://localhost:5173", "https://victorious-sand-04cc4be0f.5.azurestaticapps.net")
                     .AllowAnyMethod()
                     .AllowAnyHeader();
                 });
@@ -48,7 +48,8 @@ namespace blogg_api
 
             builder.Services.AddScoped<IAppRepository<BlogPost>, BlogPostRepository>();
             builder.Services.AddScoped<IPostRepository<BlogPost>, BlogPostRepository>();
-            builder.Services.AddScoped<IPostWithTagRepository<BlogPostWithTagsDTO>, BlogPostRepository>();
+            builder.Services.AddScoped<ISinglePostRepository<BlogPostWithTagsDTO>, BlogPostRepository>();
+            builder.Services.AddScoped<IPostWithTagRepository<BlogPostHeaderWithTagsDTO>, BlogPostRepository>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogPostCreateDTO>();
             builder.Services.AddValidatorsFromAssemblyContaining<BlogPostUpdateDTO>();
 
@@ -331,7 +332,7 @@ namespace blogg_api
                 return Results.Ok(response);
             }).Produces<ApiResponse>(200).Produces(400);
 
-            app.MapGet("/api/BlogPostsWithTags", async (IPostWithTagRepository<BlogPostWithTagsDTO> repository) =>
+            app.MapGet("/api/BlogPostsWithTags", async (IPostWithTagRepository<BlogPostHeaderWithTagsDTO> repository) =>
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetPostsWithTagsAsync();
@@ -347,7 +348,7 @@ namespace blogg_api
                 return Results.Ok(response);
             }).Produces<ApiResponse>(200).Produces(400);
 
-            app.MapGet("api/BlogPost/{id:int}", async (IPostRepository<BlogPost> repository, int Id) =>
+            app.MapGet("api/BlogPost/{id:int}", async (ISinglePostRepository<BlogPostWithTagsDTO> repository, int Id) =>
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetPostWithTagsAsync(Id);
@@ -363,7 +364,7 @@ namespace blogg_api
                 return Results.Ok(response);
             }).Produces<ApiResponse>(200).Produces(400);
 
-            app.MapGet("api/BlogPostTag/{id:int}", async (IPostWithTagRepository<BlogPostWithTagsDTO> repository, int Id) =>
+            app.MapGet("api/BlogPostTag/{id:int}", async (IPostWithTagRepository<BlogPostHeaderWithTagsDTO> repository, int Id) =>
             {
                 ApiResponse response = new ApiResponse() { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest };
                 response.Result = await repository.GetPostsByTagAsync(Id);
